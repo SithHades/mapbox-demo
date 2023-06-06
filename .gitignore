@@ -16,3 +16,4 @@ htmlcov/
 .tox/
 .nox/
 docs/_build/
+node_modules
