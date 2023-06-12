@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { MapboxService } from './mapbox.service';
 
 @Controller('mapbox')
@@ -7,6 +7,11 @@ export class MapboxController {
 
   @Get()
   async demo() {
-    return await this.mapboxService.makeRequest();
+    return await this.mapboxService.makeNavigationRequest();
+  }
+
+  @Get('geocoding/:location')
+  async geocoding(@Param('location') location: any): Promise<any> {
+    return await this.mapboxService.geocoding(location);
   }
 }

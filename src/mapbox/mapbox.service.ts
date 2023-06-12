@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { config } from 'dotenv';
-import { map } from 'rxjs';
 
 @Injectable()
 export class MapboxService {
@@ -25,7 +24,7 @@ export class MapboxService {
     geometries: 'geojson', // Specify the response format (geojson, polyline, polyline6)
   };
 
-  async makeRequest() {
+  async makeNavigationRequest() {
     return fetch(
       `https://api.mapbox.com/directions/v5/mapbox/${this.request.profile}/${this.request.waypoints[0].coordinates[0]},${this.request.waypoints[0].coordinates[1]};${this.request.waypoints[1].coordinates[0]},${this.request.waypoints[1].coordinates[1]};${this.request.waypoints[2].coordinates[0]},${this.request.waypoints[2].coordinates[1]}?geometries=${this.request.geometries}&access_token=${this.accessToken}`,
       {
@@ -68,5 +67,14 @@ export class MapboxService {
       .catch((error) => {
         console.error('Error:', error);
       });
+  }
+
+  async geocoding(location: any) {
+    return fetch(
+      'https://api.mapbox.com/geocoding/v5/mapbox.places/' +
+        location.toString().toLowerCase() +
+        '?country=de&proximity=ip&language=de&access_token=' +
+        this.accessToken,
+    );
   }
 }
