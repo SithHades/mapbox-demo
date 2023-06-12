@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { config } from 'dotenv';
+import { Schedule } from 'src/model/schedule';
+import { ScheduleGroup } from 'src/model/scheduleGroup';
 
 @Injectable()
 export class MapboxService {
@@ -73,8 +75,66 @@ export class MapboxService {
     return fetch(
       'https://api.mapbox.com/geocoding/v5/mapbox.places/' +
         location.toString().toLowerCase() +
-        '?country=de&proximity=ip&language=de&access_token=' +
+        '.json?country=de&proximity=ip&language=de&access_token=' +
         this.accessToken,
-    );
+      {
+        method: 'GET',
+      },
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        return data.features[0].center;
+      });
+  }
+
+  async navigationalDistanceBeteenPoints(
+    pA: [number, number],
+    pB: [number, number],
+  ): Promise<number> {
+    return pA[0] + pB[0];
+  }
+
+  /**
+   * Groups schedules together based on various criterias.
+   * ! Groups can be containing only one schedule. If so, a cloud message should be sent, that no group was found.
+   * @param schedules schedules to be grouped together.
+   * @returns groups of schedules
+   */
+  groupSchedules(schedules: Schedule[]): ScheduleGroup[] {
+    const groups: ScheduleGroup[] = [];
+
+    schedules.forEach((schedule) => {
+      const { method, toOffice, end } = schedule;
+
+      const existingGroup = groups.find((group) => {
+        return (
+          group.method === method &&
+          group.toOffice === toOffice &&
+          group.schedules.some((existingSchedule) => {
+            const { end: existingEnd } = existingSchedule;
+            return toOffice ? this.areCoordinatesEqual(end, existingEnd) : true;
+          }) &&
+          group.schedules[0].time
+        );
+      });
+
+      if (existingGroup) {
+        existingGroup.schedules.push(schedule);
+      } else {
+        const newGroup: ScheduleGroup = {
+          method,
+          toOffice,
+          schedules: [schedule],
+        };
+        groups.push(newGroup);
+      }
+    });
+
+    return groups;
+  }
+
+  areCoordinatesEqual(a: [number, number], b: [number, number]): boolean {
+    return a[0] === b[0] && a[1] === b[1];
   }
 }

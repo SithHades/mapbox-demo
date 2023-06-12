@@ -12,6 +12,7 @@ export class MapboxController {
 
   @Get('geocoding/:location')
   async geocoding(@Param('location') location: any): Promise<any> {
+    console.log(await this.mapboxService.geocoding(location));
     return await this.mapboxService.geocoding(location);
   }
 }
