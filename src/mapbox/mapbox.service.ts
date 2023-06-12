@@ -134,7 +134,31 @@ export class MapboxService {
     return groups;
   }
 
-  areCoordinatesEqual(a: [number, number], b: [number, number]): boolean {
-    return a[0] === b[0] && a[1] === b[1];
+  /**
+   *
+   * @param a First pair of coordinates
+   * @param b Second pair of coordinates
+   * @param threshold in degrees (default: 0.0001 ~ 11.1m)
+   * @returns boolean
+   */
+  areCoordinatesEqual(
+    a: [number, number],
+    b: [number, number],
+    threshold = 0.0001,
+  ): boolean {
+    return (
+      Math.abs(a[0] - b[0]) < threshold && Math.abs(a[1] - b[1]) < threshold
+    );
+  }
+
+  /**
+   * Return wether two dates are equal, considering a threshold.
+   * @param a First DateTime object
+   * @param b Second DateTime object
+   * @param threshold in milliseconds (default: 1 minute)
+   * @returns boolean
+   */
+  areDatesEqual(a: Date, b: Date, threshold: number = 1000 * 60): boolean {
+    return Math.abs(a.getTime() - b.getTime()) < threshold;
   }
 }
